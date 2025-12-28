@@ -14,7 +14,7 @@ class BarangDitemukanController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 10);
-        $barang = BarangDitemukan::with('admin')
+        $barang = BarangDitemukan::with('user')  // GANTI admin jadi user
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
@@ -44,7 +44,7 @@ class BarangDitemukanController extends Controller
             ], 400);
         }
 
-        $admin = JWTAuth::parseToken()->authenticate();
+        $user = JWTAuth::parseToken()->authenticate();  // GANTI admin jadi user
 
         $fotoPath = null;
         if ($request->hasFile('foto')) {
@@ -52,7 +52,7 @@ class BarangDitemukanController extends Controller
         }
 
         $barang = BarangDitemukan::create([
-            'admin_id' => $admin->admin_id ?? null,
+            'user_id' => $user->user_id,  // GANTI admin_id jadi user_id
             'nama_barang' => $request->nama_barang,
             'deskripsi' => $request->deskripsi,
             'tanggal_ditemukan' => $request->tanggal_ditemukan,
@@ -71,7 +71,7 @@ class BarangDitemukanController extends Controller
 
     public function show(string $id)
     {
-        $barang = BarangDitemukan::with('admin', 'klaim')->find($id);
+        $barang = BarangDitemukan::with('user', 'klaim')->find($id);  // GANTI admin jadi user
 
         if (!$barang) {
             return response()->json([

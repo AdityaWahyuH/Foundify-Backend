@@ -1,41 +1,276 @@
 "A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
 scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
 
-"Indicates what fields are available at the top level of a query operation."
-type Query {
-    "Find a single user by an identifying attribute."
-    user(
-      "Search by primary key."
-      id: ID @eq @rules(apply: ["prohibits:email", "required_without:email"])
+"A date string with format `Y-m-d`, e.g. `2018-05-23`."
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
-      "Search by email address."
-      email: String @eq @rules(apply: ["prohibits:id", "required_without:id", "email"])
-    ): User @find
+# ==================== TYPES ====================
 
-    "List multiple users."
-    users(
-      "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
-      name: String @where(operator: "like")
-    ): [User!]! @paginate(defaultCount: 10)
+type User {
+    user_id: ID!
+    username: String!
+    email: String!
+    nama: String!
+    no_telp: String
+    role: String!
+    created_at: DateTime
+    updated_at: DateTime
+    barangHilang: [BarangHilang!]! @hasMany
+    barangDitemukan: [BarangDitemukan!]! @hasMany
+    klaim: [Klaim!]! @hasMany
+    poin: Poin @hasOne
+    tukarPoin: [TukarPoin!]! @hasMany
 }
 
-"Account of a person who uses this application."
-type User {
-    "Unique primary key."
-    id: ID!
-
-    "Non-unique name."
-    name: String!
-
-    "Unique email address."
+type Admin {
+    admin_id: ID!
+    username: String!
     email: String!
+    nama: String!
+    created_at: DateTime
+    updated_at: DateTime
+}
 
-    "When the email was verified."
-    email_verified_at: DateTime
+type BarangHilang {
+    barang_hilang_id: ID!
+    user_id: ID!
+    nama_barang: String!
+    deskripsi: String!
+    tanggal_hilang: Date!
+    lokasi: String!
+    status: String!
+    foto: String
+    created_at: DateTime
+    updated_at: DateTime
+    user: User! @belongsTo
+}
 
-    "When the account was created."
-    created_at: DateTime!
+type BarangDitemukan {
+    barang_ditemukan_id: ID!
+    user_id: ID!
+    nama_barang: String!
+    deskripsi: String!
+    tanggal_ditemukan: Date!
+    lokasi: String!
+    lokasi_barang_ditemukan: String
+    jadwal_penjemputan: DateTime
+    lokasi_penjemputan: String
+    status: String!
+    foto: String
+    created_at: DateTime
+    updated_at: DateTime
+    user: User! @belongsTo
+    klaim: [Klaim!]! @hasMany
+}
 
-    "When the account was last updated."
-    updated_at: DateTime!
+type Klaim {
+    klaim_id: ID!
+    user_id: ID!
+    barang_ditemukan_id: ID!
+    bukti_kepemilikan: String!
+    status: String!
+    tanggal_klaim: DateTime!
+    verified_at: DateTime
+    created_at: DateTime
+    updated_at: DateTime
+    user: User! @belongsTo
+    barangDitemukan: BarangDitemukan! @belongsTo
+}
+
+type Poin {
+    poin_id: ID!
+    user_id: ID!
+    total_poin: Int!
+    created_at: DateTime
+    updated_at: DateTime
+    user: User! @belongsTo
+    riwayatPoin: [RiwayatPoin!]! @hasMany
+}
+
+type RiwayatPoin {
+    riwayat_id: ID!
+    poin_id: ID!
+    jumlah_poin: Int!
+    keterangan: String!
+    tanggal_transaksi: DateTime!
+    poin: Poin! @belongsTo
+}
+
+type KatalogReward {
+    katalog_id: ID!
+    nama_reward: String!
+    deskripsi: String
+    poin_required: Int!
+    stok: Int!
+    gambar: String
+    status: String!
+    created_at: DateTime
+    updated_at: DateTime
+    tukarPoin: [TukarPoin!]! @hasMany
+}
+
+type TukarPoin {
+    tukar_id: ID!
+    user_id: ID!
+    katalog_id: ID!
+    jumlah_poin: Int!
+    tanggal_tukar: DateTime!
+    status: String!
+    created_at: DateTime
+    updated_at: DateTime
+    user: User! @belongsTo
+    katalogReward: KatalogReward! @belongsTo
+}
+
+# ==================== QUERIES ====================
+
+type Query {
+    # User
+    users: [User!]! @all
+    user(user_id: ID! @eq): User @find
+
+    # Admin
+    admins: [Admin!]! @all
+    admin(admin_id: ID! @eq): Admin @find
+
+    # Barang Hilang
+    barangHilangList: [BarangHilang!]! @all
+    barangHilang(barang_hilang_id: ID! @eq): BarangHilang @find
+    barangHilangByStatus(status: String! @eq): [BarangHilang!]! @all
+
+    # Barang Ditemukan
+    barangDitemukanList: [BarangDitemukan!]! @all
+    barangDitemukan(barang_ditemukan_id: ID! @eq): BarangDitemukan @find
+    barangDitemukanByStatus(status: String! @eq): [BarangDitemukan!]! @all
+
+    # Klaim
+    klaimList: [Klaim!]! @all
+    klaim(klaim_id: ID! @eq): Klaim @find
+    klaimByStatus(status: String! @eq): [Klaim!]! @all
+
+    # Poin
+    poinList: [Poin!]! @all
+    poin(poin_id: ID! @eq): Poin @find
+    poinByUser(user_id: ID! @eq): Poin @find
+
+    # Riwayat Poin
+    riwayatPoinList: [RiwayatPoin!]! @all
+
+    # Katalog Reward
+    katalogRewardList: [KatalogReward!]! @all
+    katalogReward(katalog_id: ID! @eq): KatalogReward @find
+
+    # Tukar Poin
+    tukarPoinList: [TukarPoin!]! @all
+    tukarPoin(tukar_id: ID! @eq): TukarPoin @find
+}
+
+# ==================== MUTATIONS ====================
+
+type Mutation {
+    # Barang Hilang
+    createBarangHilang(
+        user_id: ID!
+        nama_barang: String!
+        deskripsi: String!
+        tanggal_hilang: Date!
+        lokasi: String!
+        status: String!
+        foto: String
+    ): BarangHilang @create
+
+    updateBarangHilang(
+        barang_hilang_id: ID! @eq
+        nama_barang: String
+        deskripsi: String
+        tanggal_hilang: Date
+        lokasi: String
+        status: String
+        foto: String
+    ): BarangHilang @update
+
+    deleteBarangHilang(barang_hilang_id: ID! @eq): BarangHilang @delete
+
+    # Barang Ditemukan
+    createBarangDitemukan(
+        user_id: ID!
+        nama_barang: String!
+        deskripsi: String!
+        tanggal_ditemukan: Date!
+        lokasi: String!
+        lokasi_barang_ditemukan: String
+        jadwal_penjemputan: DateTime
+        lokasi_penjemputan: String
+        status: String!
+        foto: String
+    ): BarangDitemukan @create
+
+    updateBarangDitemukan(
+        barang_ditemukan_id: ID! @eq
+        nama_barang: String
+        deskripsi: String
+        tanggal_ditemukan: Date
+        lokasi: String
+        lokasi_barang_ditemukan: String
+        jadwal_penjemputan: DateTime
+        lokasi_penjemputan: String
+        status: String
+        foto: String
+    ): BarangDitemukan @update
+
+    deleteBarangDitemukan(barang_ditemukan_id: ID! @eq): BarangDitemukan @delete
+
+    # Klaim
+    createKlaim(
+        user_id: ID!
+        barang_ditemukan_id: ID!
+        bukti_kepemilikan: String!
+        status: String!
+    ): Klaim @create
+
+    updateKlaim(
+        klaim_id: ID! @eq
+        bukti_kepemilikan: String
+        status: String
+        verified_at: DateTime
+    ): Klaim @update
+
+    deleteKlaim(klaim_id: ID! @eq): Klaim @delete
+
+    # Katalog Reward
+    createKatalogReward(
+        nama_reward: String!
+        deskripsi: String
+        poin_required: Int!
+        stok: Int!
+        gambar: String
+        status: String!
+    ): KatalogReward @create
+
+    updateKatalogReward(
+        katalog_id: ID! @eq
+        nama_reward: String
+        deskripsi: String
+        poin_required: Int
+        stok: Int
+        gambar: String
+        status: String
+    ): KatalogReward @update
+
+    deleteKatalogReward(katalog_id: ID! @eq): KatalogReward @delete
+
+    # Tukar Poin
+    createTukarPoin(
+        user_id: ID!
+        katalog_id: ID!
+        jumlah_poin: Int!
+        status: String!
+    ): TukarPoin @create
+
+    updateTukarPoin(
+        tukar_id: ID! @eq
+        status: String
+    ): TukarPoin @update
+
+    deleteTukarPoin(tukar_id: ID! @eq): TukarPoin @delete
 }

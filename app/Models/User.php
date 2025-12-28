@@ -49,6 +49,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(BarangHilang::class, 'user_id', 'user_id');
     }
 
+    public function barangDitemukan()
+    {
+        return $this->hasMany(BarangDitemukan::class, 'user_id', 'user_id');
+    }
+
     public function klaim()
     {
         return $this->hasMany(Klaim::class, 'user_id', 'user_id');

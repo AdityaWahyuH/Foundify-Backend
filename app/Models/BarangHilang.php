@@ -34,8 +34,5 @@ class BarangHilang extends Model
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    public function reward()
-    {
-        return $this->hasOne(Reward::class, 'barang_hilang_id', 'barang_hilang_id');
-    }
+
 }

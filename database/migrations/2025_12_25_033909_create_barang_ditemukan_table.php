@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('barang_ditemukan', function (Blueprint $table) {
             $table->id('barang_ditemukan_id');
-            $table->unsignedBigInteger('admin_id')->nullable();
+            $table->unsignedBigInteger('user_id');
             $table->string('nama_barang', 100);
             $table->text('deskripsi');
             $table->date('tanggal_ditemukan');
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('foto', 255)->nullable();
             $table->timestamps();
 
-            $table->foreign('admin_id')->references('admin_id')->on('admin')->onDelete('set null');
+            $table->foreign('user_id')->references('user_id')->on('user')->onDelete('cascade');
         });
     }
 

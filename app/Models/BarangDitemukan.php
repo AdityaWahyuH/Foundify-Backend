@@ -13,7 +13,7 @@ class BarangDitemukan extends Model
     protected $primaryKey = 'barang_ditemukan_id';
 
     protected $fillable = [
-        'admin_id',
+        'user_id',
         'nama_barang',
         'deskripsi',
         'tanggal_ditemukan',
@@ -33,9 +33,9 @@ class BarangDitemukan extends Model
     ];
 
     // Relationships
-    public function admin()
+    public function user()  // GANTI dari admin()
     {
-        return $this->belongsTo(Admin::class, 'admin_id', 'admin_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     public function klaim()
