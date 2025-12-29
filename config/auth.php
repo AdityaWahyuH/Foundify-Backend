@@ -28,6 +28,11 @@ return [
             'driver' => 'jwt',
             'provider' => 'users',
         ],
+        // Guard untuk Admin
+        'admin-api' => [
+            'driver' => 'jwt',
+            'provider' => 'admins',
+        ],
     ],
 
     /*
@@ -40,6 +45,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],
+        // Provider untuk Admin
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class,
         ],
     ],
 

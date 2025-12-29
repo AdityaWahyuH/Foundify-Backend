@@ -20,8 +20,11 @@ use App\Http\Controllers\Api\TukarPoinController;
 // =============================================
 
 Route::prefix('auth')->group(function () {
+    // User Auth
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+
+    // Admin Auth
     Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 });
 
@@ -37,12 +40,12 @@ Route::get('/katalog-reward/{id}', [KatalogRewardController::class, 'show']);
 
 
 // =============================================
-// PROTECTED ROUTES (Perlu login - JWT)
+// PROTECTED ROUTES - USER (auth:api)
 // =============================================
 
 Route::middleware('auth:api')->group(function () {
 
-    // Auth
+    // User Auth
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
@@ -55,7 +58,7 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/barang-hilang/{id}', [BarangHilangController::class, 'destroy']);
     Route::get('/my-barang-hilang', [BarangHilangController::class, 'myItems']);
 
-    // Barang Ditemukan (Admin)
+    // Barang Ditemukan
     Route::post('/barang-ditemukan', [BarangDitemukanController::class, 'store']);
     Route::put('/barang-ditemukan/{id}', [BarangDitemukanController::class, 'update']);
     Route::delete('/barang-ditemukan/{id}', [BarangDitemukanController::class, 'destroy']);
@@ -64,22 +67,41 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/klaim', [KlaimController::class, 'index']);
     Route::post('/klaim', [KlaimController::class, 'store']);
     Route::get('/klaim/{id}', [KlaimController::class, 'show']);
-    Route::put('/klaim/{id}/verify', [KlaimController::class, 'verify']);
     Route::get('/my-klaim', [KlaimController::class, 'myKlaims']);
 
     // Poin
     Route::get('/poin', [PoinController::class, 'index']);
     Route::get('/poin/riwayat', [PoinController::class, 'riwayat']);
 
+    // Tukar Poin (User)
+    Route::post('/tukar-poin', [TukarPoinController::class, 'store']);
+    Route::get('/tukar-poin/riwayat', [TukarPoinController::class, 'riwayat']);
+});
+
+
+// =============================================
+// PROTECTED ROUTES - ADMIN (auth:admin-api)
+// =============================================
+
+Route::middleware('auth:admin-api')->group(function () {
+
+    // Admin Auth
+    Route::prefix('auth/admin')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logoutAdmin']);
+        Route::post('/refresh', [AuthController::class, 'refreshAdmin']);
+        Route::get('/me', [AuthController::class, 'meAdmin']);
+    });
+
+    // Klaim Verification (Admin Only)
+    Route::put('/klaim/{id}/verify', [KlaimController::class, 'verify']);
+
     // Katalog Reward (Admin CRUD)
     Route::post('/katalog-reward', [KatalogRewardController::class, 'store']);
     Route::put('/katalog-reward/{id}', [KatalogRewardController::class, 'update']);
     Route::delete('/katalog-reward/{id}', [KatalogRewardController::class, 'destroy']);
 
-    // Tukar Poin
+    // Tukar Poin (Admin)
     Route::get('/tukar-poin', [TukarPoinController::class, 'index']);
-    Route::post('/tukar-poin', [TukarPoinController::class, 'store']);
-    Route::get('/tukar-poin/riwayat', [TukarPoinController::class, 'riwayat']);
     Route::get('/tukar-poin/{id}', [TukarPoinController::class, 'show']);
     Route::put('/tukar-poin/{id}/verify', [TukarPoinController::class, 'verify']);
 });

@@ -14,6 +14,10 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
+    // =============================================
+    // USER AUTHENTICATION
+    // =============================================
+
     // Register User
     public function register(Request $request)
     {
@@ -97,6 +101,77 @@ class AuthController extends Controller
         ], 200);
     }
 
+    // Get Current User
+    public function me()
+    {
+        try {
+            $user = auth('api')->user();
+
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User tidak ditemukan',
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Data user berhasil diambil',
+                'data' => $user
+            ], 200);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Token tidak valid',
+            ], 401);
+        }
+    }
+
+    // Logout User
+    public function logout()
+    {
+        try {
+            auth('api')->logout();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Logout berhasil',
+            ], 200);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal logout',
+            ], 500);
+        }
+    }
+
+// Refresh Token User
+public function refresh()
+{
+    try {
+        /** @var \Tymon\JWTAuth\JWTGuard $auth */
+        $auth = auth('api');
+        $token = $auth->refresh();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Token berhasil diperbarui',
+            'data' => [
+                'token' => $token,
+            ]
+        ], 200);
+    } catch (JWTException $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Gagal refresh token',
+        ], 500);
+    }
+}
+
+    // =============================================
+    // ADMIN AUTHENTICATION
+    // =============================================
+
     // Login Admin
     public function loginAdmin(Request $request)
     {
@@ -113,16 +188,17 @@ class AuthController extends Controller
             ], 400);
         }
 
-        $admin = Admin::where('email', $request->email)->first();
+        // Attempt login dengan guard admin-api
+        $credentials = $request->only('email', 'password');
 
-        if (!$admin || !Hash::check($request->password, $admin->password)) {
+        if (!$token = auth('admin-api')->attempt($credentials)) {
             return response()->json([
                 'status' => false,
-                'message' => 'Email atau password salah',
+                'message' => 'Email atau password admin salah',
             ], 401);
         }
 
-        $token = JWTAuth::fromUser($admin);
+        $admin = auth('admin-api')->user();
 
         return response()->json([
             'status' => true,
@@ -134,16 +210,23 @@ class AuthController extends Controller
         ], 200);
     }
 
-    // Get Current User
-    public function me(Request $request)
+    // Get Current Admin
+    public function meAdmin()
     {
         try {
-            $user = JWTAuth::parseToken()->authenticate();
+            $admin = auth('admin-api')->user();
+
+            if (!$admin) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Admin tidak ditemukan',
+                ], 404);
+            }
 
             return response()->json([
                 'status' => true,
-                'message' => 'Data user berhasil diambil',
-                'data' => $user
+                'message' => 'Data admin berhasil diambil',
+                'data' => $admin
             ], 200);
         } catch (JWTException $e) {
             return response()->json([
@@ -153,42 +236,44 @@ class AuthController extends Controller
         }
     }
 
-    // Logout
-    public function logout()
+    // Logout Admin
+    public function logoutAdmin()
     {
         try {
-            JWTAuth::invalidate(JWTAuth::getToken());
+            auth('admin-api')->logout();
 
             return response()->json([
                 'status' => true,
-                'message' => 'Logout berhasil',
+                'message' => 'Logout admin berhasil',
             ], 200);
         } catch (JWTException $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Gagal logout',
+                'message' => 'Gagal logout admin',
             ], 500);
         }
     }
 
-    // Refresh Token
-    public function refresh()
-    {
-        try {
-            $token = JWTAuth::refresh(JWTAuth::getToken());
+// Refresh Token Admin
+public function refreshAdmin()
+{
+    try {
+        /** @var \Tymon\JWTAuth\JWTGuard $auth */
+        $auth = auth('admin-api');
+        $token = $auth->refresh();
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Token berhasil diperbarui',
-                'data' => [
-                    'token' => $token,
-                ]
-            ], 200);
-        } catch (JWTException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Gagal refresh token',
-            ], 500);
-        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Token admin berhasil diperbarui',
+            'data' => [
+                'token' => $token,
+            ]
+        ], 200);
+    } catch (JWTException $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Gagal refresh token admin',
+        ], 500);
     }
+}
 }
