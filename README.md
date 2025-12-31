@@ -38,46 +38,64 @@ Foundify adalah platform terpusat untuk pelaporan barang hilang dan ditemukan. S
 
 ### 1. Clone Repository
 
-git clone https://github.com/kelompok-10/foundify-backend.git
-cd foundify-backend
+```bash
+git clone https://github.com/AdityaWahyuH/Foundify-Backend.git
+cd Foundify-Backend
+```
 
 ### 2. Install Dependencies
 
+```bash
 composer install
+```
 
 ### 3. Konfigurasi Environment
 
+```bash
 cp .env.example .env
+```
 
 Edit file `.env` dan sesuaikan konfigurasi database:
 
+```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=foundify_db
 DB_USERNAME=root
 DB_PASSWORD=
+```
 
 ### 4. Generate Application Key
 
+```bash
 php artisan key:generate
+```
 
 ### 5. Generate JWT Secret
 
+```bash
 php artisan jwt:secret
+```
 
 ### 6. Jalankan Migration dan Seeder
 
+```bash
 php artisan migrate
 php artisan db:seed
+```
 
 ### 7. Buat Storage Link
 
+```bash
 php artisan storage:link
+```
 
 ### 8. Jalankan Server
 
+```bash
 php artisan serve
+```
 
 Aplikasi berjalan di `http://localhost:8000`
 
@@ -111,13 +129,17 @@ Database terdiri dari 9 tabel yang saling berelasi:
 
 ### Base URL
 
+```
 http://localhost:8000/api
+```
 
 ### Authentication
 
 Semua endpoint yang membutuhkan autentikasi harus menyertakan JWT token di header:
 
+```
 Authorization: Bearer {token}
+```
 
 ---
 
@@ -205,13 +227,10 @@ Testing dilakukan menggunakan Postman untuk REST API dan Altair GraphQL Client u
 
 ## Tim Pengembang
 
-| Nama |
-|------|
-| Aditya Wahyu Hidayatullah |
-| Mohamad Fikri Isfahani |
-| Joe Petra |
-| Abel Chrisnaldi |
-
+- Aditya Wahyu Hidayatullah
+- Mohamad Fikri Isfahani
+- Joe Petra
+- Abel Chrisnaldi
 
 ## API Documentation
 
