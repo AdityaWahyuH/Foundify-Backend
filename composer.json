@@ -11,6 +11,7 @@
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
         "laravel/ui": "^4.5",
+        "mll-lab/laravel-graphiql": "^4.0",
         "nuwave/lighthouse": "^6.64",
         "tymon/jwt-auth": "^2.2"
     },
