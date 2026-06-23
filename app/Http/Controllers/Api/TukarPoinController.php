@@ -128,6 +128,13 @@ class TukarPoinController extends Controller
             ], 404);
         }
 
+        if ($tukar->status !== 'pending') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Penukaran sudah pernah diverifikasi',
+            ], 400);
+        }
+
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:completed,cancelled',
         ]);
@@ -143,10 +150,18 @@ class TukarPoinController extends Controller
         // Jika cancelled, kembalikan poin dan stok
         if ($request->status === 'cancelled') {
             $poin = Poin::where('user_id', $tukar->user_id)->first();
+            $reward = KatalogReward::find($tukar->katalog_id);
+
+            if (!$poin || !$reward) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data poin atau reward tidak ditemukan',
+                ], 400);
+            }
+
             $poin->total_poin += $tukar->jumlah_poin;
             $poin->save();
 
-            $reward = KatalogReward::find($tukar->katalog_id);
             $reward->stok += 1;
             $reward->save();
 

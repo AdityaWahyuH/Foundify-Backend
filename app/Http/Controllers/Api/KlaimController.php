@@ -109,6 +109,13 @@ class KlaimController extends Controller
             ], 404);
         }
 
+        if ($klaim->status !== 'pending') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Klaim sudah pernah diverifikasi',
+            ], 400);
+        }
+
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:approved,rejected',
         ]);
@@ -121,14 +128,26 @@ class KlaimController extends Controller
             ], 400);
         }
 
+        $barang = null;
+
+        // Jika approved, update status barang dan beri poin
+        if ($request->status === 'approved') {
+            // Update status barang
+            $barang = BarangDitemukan::find($klaim->barang_ditemukan_id);
+            if (!$barang || $barang->status !== 'tersedia') {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Barang sudah tidak tersedia untuk diklaim',
+                ], 400);
+            }
+        }
+
         $klaim->status = $request->status;
         $klaim->verified_at = now();
         $klaim->save();
 
         // Jika approved, update status barang dan beri poin
         if ($request->status === 'approved') {
-            // Update status barang
-            $barang = BarangDitemukan::find($klaim->barang_ditemukan_id);
             $barang->status = 'diklaim';
             $barang->save();
 

@@ -98,6 +98,15 @@ class BarangDitemukanController extends Controller
             ], 404);
         }
 
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($barang->user_id !== $user->user_id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengubah data ini',
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'nama_barang' => 'sometimes|string|max:100',
             'deskripsi' => 'sometimes|string',
@@ -143,6 +152,15 @@ class BarangDitemukanController extends Controller
                 'status' => false,
                 'message' => 'Barang tidak ditemukan',
             ], 404);
+        }
+
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($barang->user_id !== $user->user_id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Anda tidak memiliki akses untuk menghapus data ini',
+            ], 403);
         }
 
         if ($barang->foto) {

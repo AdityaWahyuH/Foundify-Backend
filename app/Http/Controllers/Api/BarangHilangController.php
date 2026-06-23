@@ -69,7 +69,7 @@ class BarangHilangController extends Controller
 
     public function show(string $id)
     {
-        $barang = BarangHilang::with('user', 'reward')->find($id);
+        $barang = BarangHilang::with('user')->find($id);
 
         if (!$barang) {
             return response()->json([
